@@ -1,138 +1,102 @@
--- Gui tạo bởi ChatGPT theo yêu cầu của Boss
--- GUI fly kéo bằng W + TP chọn người chơi
-
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local mouse = LocalPlayer:GetMouse()
-
--- Fly setup
-local flying = false
-local UIS = game:GetService("UserInputService")
-local camera = workspace.CurrentCamera
-local flySpeed = 100
+-- ⚠️ Dán vào executor như Synapse, KRNL
+-- TP GUI: TPA Player đến vị trí của bạn
 
 -- Rainbow border function
 local function rainbow()
-	local t = tick() * 2
-	return Color3.fromHSV(t % 1, 1, 1)
+	local hue = tick() % 5 / 5
+	return Color3.fromHSV(hue, 1, 1)
 end
 
 -- GUI
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
-ScreenGui.Name = "BossPythonUI"
+ScreenGui.Name = "TPA_GUI"
 
-local mainFrame = Instance.new("Frame", ScreenGui)
-mainFrame.Size = UDim2.new(0, 200, 0, 250)
-mainFrame.Position = UDim2.new(0, 10, 0.5, -125)
-mainFrame.BackgroundColor3 = Color3.new(1, 1, 1)
-mainFrame.BorderSizePixel = 2
-mainFrame.Name = "BossPython"
+local Frame = Instance.new("Frame", ScreenGui)
+Frame.Size = UDim2.new(0, 300, 0, 180)
+Frame.Position = UDim2.new(0.5, -150, 0.5, -90)
+Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Frame.BorderSizePixel = 2
+Frame.Active = true
+Frame.Draggable = true
 
--- Viền rainbow
-local border = Instance.new("UIStroke", mainFrame)
-border.Thickness = 3
-border.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+-- Rainbow border effect
 spawn(function()
 	while true do
-		border.Color = rainbow()
-		wait(0.1)
+		Frame.BorderColor3 = rainbow()
+		wait(0.05)
 	end
 end)
 
--- Title
-local title = Instance.new("TextLabel", mainFrame)
-title.Size = UDim2.new(1, 0, 0, 30)
-title.BackgroundTransparency = 1
-title.Text = "BossPython"
-title.TextColor3 = Color3.new(0, 0, 0)
-title.Font = Enum.Font.SourceSansBold
-title.TextScaled = true
+-- Tiêu đề
+local Title = Instance.new("TextLabel", Frame)
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.Text = "TPA MENU"
+Title.BackgroundTransparency = 1
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 18
 
--- Hide / Show Toggle
-local toggle = Instance.new("TextButton", mainFrame)
-toggle.Text = "Ẩn Menu"
-toggle.Size = UDim2.new(1, 0, 0, 25)
-toggle.Position = UDim2.new(0, 0, 1, -25)
-toggle.BackgroundColor3 = Color3.fromRGB(220, 220, 220)
-toggle.TextColor3 = Color3.new(0, 0, 0)
-toggle.MouseButton1Click:Connect(function()
-	mainFrame.Visible = false
-end)
+-- Dropdown danh sách player
+local PlayerList = Instance.new("TextButton", Frame)
+PlayerList.Size = UDim2.new(1, -20, 0, 30)
+PlayerList.Position = UDim2.new(0, 10, 0, 40)
+PlayerList.Text = "Chọn người chơi..."
+PlayerList.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+PlayerList.TextColor3 = Color3.fromRGB(255, 255, 255)
+PlayerList.Font = Enum.Font.Gotham
+PlayerList.TextSize = 14
 
-local openButton = Instance.new("TextButton", ScreenGui)
-openButton.Text = "👁 Mở"
-openButton.Size = UDim2.new(0, 60, 0, 30)
-openButton.Position = UDim2.new(0, 10, 0, 10)
-openButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-openButton.TextColor3 = Color3.new(0, 0, 0)
-openButton.Visible = true
-openButton.MouseButton1Click:Connect(function()
-	mainFrame.Visible = true
-end)
+-- Danh sách ẩn hiện
+local DropDownFrame = Instance.new("Frame", Frame)
+DropDownFrame.Size = UDim2.new(1, -20, 0, 100)
+DropDownFrame.Position = UDim2.new(0, 10, 0, 70)
+DropDownFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+DropDownFrame.Visible = false
+DropDownFrame.ClipsDescendants = true
 
--- Fly Button
-local flyBtn = Instance.new("TextButton", mainFrame)
-flyBtn.Text = "✈️ Fly"
-flyBtn.Size = UDim2.new(1, -10, 0, 40)
-flyBtn.Position = UDim2.new(0, 5, 0, 40)
-flyBtn.BackgroundColor3 = Color3.fromRGB(230, 230, 230)
-flyBtn.TextColor3 = Color3.new(0, 0, 0)
-
-flyBtn.MouseButton1Click:Connect(function()
-	if flying then
-		flying = false
-	else
-		flying = true
-		local hrp = LocalPlayer.Character:WaitForChild("HumanoidRootPart")
-		local bodyVel = Instance.new("BodyVelocity", hrp)
-		bodyVel.MaxForce = Vector3.new(1e9, 1e9, 1e9)
-		bodyVel.Velocity = Vector3.zero
-
-		spawn(function()
-			while flying do
-				if UIS:IsKeyDown(Enum.KeyCode.W) then
-					bodyVel.Velocity = camera.CFrame.LookVector * flySpeed
-				else
-					bodyVel.Velocity = Vector3.zero
-				end
-				wait()
-			end
-			bodyVel:Destroy()
-		end)
-	end
-end)
-
--- TP Button + Player list
-local tpBtn = Instance.new("TextButton", mainFrame)
-tpBtn.Text = "🧍 TP"
-tpBtn.Size = UDim2.new(1, -10, 0, 40)
-tpBtn.Position = UDim2.new(0, 5, 0, 90)
-tpBtn.BackgroundColor3 = Color3.fromRGB(230, 230, 230)
-tpBtn.TextColor3 = Color3.new(0, 0, 0)
-
-local dropdown = Instance.new("TextButton", mainFrame)
-dropdown.Size = UDim2.new(1, -10, 0, 120)
-dropdown.Position = UDim2.new(0, 5, 0, 140)
-dropdown.Text = "Chọn người để TP..."
-dropdown.BackgroundColor3 = Color3.fromRGB(245, 245, 245)
-dropdown.TextColor3 = Color3.new(0, 0, 0)
-dropdown.TextWrapped = true
-
-tpBtn.MouseButton1Click:Connect(function()
-	local list = {}
-	for _, player in pairs(Players:GetPlayers()) do
-		if player.Name ~= LocalPlayer.Name then
-			table.insert(list, player.Name)
+-- Làm danh sách người chơi
+local selectedPlayer = nil
+PlayerList.MouseButton1Click:Connect(function()
+	DropDownFrame:ClearAllChildren()
+	DropDownFrame.Visible = not DropDownFrame.Visible
+	local y = 0
+	for _, plr in pairs(game.Players:GetPlayers()) do
+		if plr ~= game.Players.LocalPlayer then
+			local btn = Instance.new("TextButton", DropDownFrame)
+			btn.Size = UDim2.new(1, 0, 0, 25)
+			btn.Position = UDim2.new(0, 0, 0, y)
+			btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+			btn.Text = plr.Name
+			btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+			btn.Font = Enum.Font.Gotham
+			btn.TextSize = 14
+			btn.MouseButton1Click:Connect(function()
+				PlayerList.Text = plr.Name
+				selectedPlayer = plr
+				DropDownFrame.Visible = false
+			end)
+			y = y + 25
 		end
 	end
-	dropdown.Text = "Danh sách:\n" .. table.concat(list, "\n")
 end)
 
-dropdown.MouseButton1Click:Connect(function()
-	local targetName = string.match(dropdown.Text, "(.+)\n") or dropdown.Text
-	local targetPlayer = Players:FindFirstChild(targetName)
-	if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-		local hrp = targetPlayer.Character.HumanoidRootPart
-		hrp.CFrame = LocalPlayer.Character.HumanoidRootPart.CFrame
+-- Nút TPA
+local TPButton = Instance.new("TextButton", Frame)
+TPButton.Size = UDim2.new(1, -20, 0, 40)
+TPButton.Position = UDim2.new(0, 10, 1, -50)
+TPButton.BackgroundColor3 = Color3.fromRGB(20, 130, 250)
+TPButton.Text = "TPA"
+TPButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+TPButton.Font = Enum.Font.GothamBold
+TPButton.TextSize = 18
+
+-- Xử lý TP
+TPButton.MouseButton1Click:Connect(function()
+	if selectedPlayer and selectedPlayer.Character and selectedPlayer.Character:FindFirstChild("HumanoidRootPart") then
+		local myHRP = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+		if myHRP then
+			selectedPlayer.Character.HumanoidRootPart.CFrame = myHRP.CFrame + Vector3.new(2, 0, 0)
+			print("Đã TP " .. selectedPlayer.Name .. " đến bạn!")
+		end
 	end
 end)
